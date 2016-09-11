@@ -75,7 +75,7 @@ app.filter('startFrom', function() {
         var begin=(c-1)*n;
         var end=  c*n;
 
-        if(Object.keys(input).length !== 0) 
+        if(Object.keys(input).length !== 0 && currentPageNum>0 && numVideosEachPage>0) 
         {
             return input.slice(begin,end);
         }
@@ -147,8 +147,8 @@ app.controller('AppController',['$scope','myAjax','md5','$timeout',function($sco
         $scope.popup.index=index;
         $scope.popup.show=true;
         $scope.popup.rateStyle=[];
-        $scope.popup=Object.assign($scope.popup,$scope.videos[index]);
-        
+        // $scope.popup=Object.assign($scope.popup,$scope.videos[index]);//not support in es5
+        Object.keys($scope.videos[index]).forEach(function(key) { $scope.popup[key] = $scope.videos[index][key]; });
         //need reload <video> element after change source
         var v = document.getElementById("popupVideo");
         v.load();
@@ -184,7 +184,7 @@ app.controller('AppController',['$scope','myAjax','md5','$timeout',function($sco
                 {
                     var v=res.data;
                     var rateSum = v.ratings.reduce(function(x,y){return x+y});
-                    var rateAvg = rateSum / v.ratings.length;
+                    var rateAvg = rateSum / parseFloat(v.ratings.length);
                     v.rateStar=new Array(Math.round(rateAvg)); //add rateStar[] attribue
                     $scope.videos[$scope.popup.index]=v; // update rating;
                 }

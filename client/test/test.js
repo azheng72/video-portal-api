@@ -2,10 +2,14 @@
 
 describe('startFrom filter', function() {
 
+    beforeEach(function(){
+        module('app');
+    });
+    
     var $filter;
     
     beforeEach(inject(function(_$filter_){
-    $filter = _$filter_;
+        $filter = _$filter_;
     }));
     
     it('should return first page', function() {
@@ -25,7 +29,7 @@ describe('startFrom filter', function() {
     
     it('currentPageNum<0', function() {
     var startFrom = $filter('startFrom');
-    expect(startFrom( [1,2,3,4,5], -2 , 2 )).toEqual([]);
+    expect(startFrom( [1,2,3,4,5], -2 , 1 )).toEqual([]);
     });
     
     it('numVideosEachPage<0', function() {
@@ -160,7 +164,7 @@ describe('function popupOpen', function () {
     
     it('popup _id should return as expect', function () {
     
-        expect($scope.popup.index._id).toEqual("57d1a3c23d8a3b0fde58f9f2");
+        expect($scope.popup['_id']).toEqual("57d1a3c23d8a3b0fde58f9f2");
     
     }); 
     
@@ -183,16 +187,6 @@ describe('function popupClose', function () {
     beforeEach(inject(function(_$controller_){
         $controller = _$controller_;
     }));
-
-    beforeEach(function(){
-        var $scope = {};
-        var controller = $controller('AppController', { $scope: $scope });
-        
-        var mockElement = document.createElement('video');
-        mockElement.pause=function(){};
-        mockElement.id='popupVideo';
-        angular.element(document.body).append(mockElement);
-    });
     
     beforeEach(inject(function ($injector) {
         $httpBackend = $injector.get('$httpBackend');
@@ -201,6 +195,13 @@ describe('function popupClose', function () {
     }));  
 
     it('selected video ratings should be updated', function () {
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+
+        var x={};
+        x.pause=function(){};
+        
+        spyOn(document, "getElementById").and.returnValue(x); 
         
         $scope.popup={
             index:0,
@@ -224,7 +225,7 @@ describe('function popupClose', function () {
                 _id:"57d1a3c23d8a3b0fde58f9f2",
                 description:"React.js is a JavaScript library.",
                 name:"[0] Getting Started With ReactJs",
-                ratings:[3,3,3,5],
+                ratings:[3,3,3,5]
             }
         });
         
@@ -232,23 +233,12 @@ describe('function popupClose', function () {
         $httpBackend.flush();
         
         expect($scope.videos[$scope.popup.index].ratings).toEqual([3,3,3,5]);
+        expect($scope.videos[$scope.popup.index].rateStar.length).toBe(4);
+        expect($scope.popup.show).toBe(false);
+        expect($scope.stopScrolling).toBe('');
     
     }); 
     
-    it('selected video rateStar should updated',function() {
-        
-        expect($scope.videos[$scope.popup.index].rateStar.length).toBe(4);
-    });
-    
-    it('popup window should hide',function() {
-        
-        expect($scope.popup.show).toBe(false);
-    });
-    
-    it('scrolling should enable',function() {
-        
-        expect($scope.stopScrolling).toBe('');
-    });
 });
 
 
@@ -264,8 +254,6 @@ describe('function loginSubmit', function () {
     }));
 
     beforeEach(function() {
-        var $scope = {};
-        var controller = $controller('AppController', { $scope: $scope });
         
         var mockElement = document.createElement('video');
         mockElement.pause=function(){};
@@ -279,8 +267,11 @@ describe('function loginSubmit', function () {
         myAjax = $injector.get('myAjax');
     }));  
         
-    it('username should be correct', function () {
+    it('return should be correct', inject(function ($timeout) {
 
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+        
         $scope.videos=[];
         $scope.login={
             username:'ali',
@@ -300,16 +291,12 @@ describe('function loginSubmit', function () {
         .respond({});
         
         $scope.loginSubmit();
+        
         $httpBackend.flush();
         
         expect($scope.user.username).toBe($scope.login.username);
-    }); 
-
-    it('sessionId should correct',function(){
+        
         expect($scope.user.sessionId).toBe('abc');
-    });
-    
-    it('timeout event should trigger', inject(function($timeout){
         // flush timeout(s) for all code under test.
     	$timeout.flush(1002);
     
@@ -317,7 +304,8 @@ describe('function loginSubmit', function () {
     	$timeout.verifyNoPendingTasks();
         
     	expect($scope.login.show).toBe('');
-    }));
+    })); 
+
 });
 
 describe('function logout', function () {
@@ -350,7 +338,7 @@ describe('function logout', function () {
             status:'success'
         });
         
-        var onSomethingHappenedSpy = spyOn(location.prototype, "reload");
+        var onSomethingHappenedSpy = spyOn(location, "reload");
         // var fooController = new FooController();
         $scope.logout();
         $httpBackend.flush();
@@ -379,10 +367,11 @@ describe('function getVideos', function () {
         
 
     
-    it('_id should correct', function () {
+    it('return videos should correct', function () {
         
         var $scope = {};
         var controller = $controller('AppController', { $scope: $scope });
+        $scope.user.sessionId='abc';
         
         $httpBackend.expect('GET', '/videos?limit=10&sessionId=abc&skip=0')
         .respond({
@@ -395,16 +384,12 @@ describe('function getVideos', function () {
             }]
         });
         
-        $scope.getVideos();
+        $scope.getVideos(0,10);
         $httpBackend.flush();
         
         expect($scope.videos[0]._id).toBe("57d1a3c23d8a3b0fde58f9f2");
-
+        expect($scope.videos[0].rateStar.length).toBe(3);
     }); 
     
-    it('rateStar should correct',function() {
-        
-        expect($scope.videos[0].rateStar.length).toBe(3);
-    });
 });
 
