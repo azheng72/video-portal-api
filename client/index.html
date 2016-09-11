@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='app'>
+<head>
+	
+	<title>Video Portal App</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">	
+	<link rel="stylesheet" href="/css/myCss.css">
+
+</head>
+<body ng-controller='AppController' style="overflow: {{stopScrolling}};" >
+	
+	<div class="bgimage"></div>
+	<login ng-show="login.show" ng-init="login.show='true'"></login>
+	<videos ng-show="!login.show" scroll></videos>
+	<popup ng-show="popup.show"></popup>
+	
+	
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jasmine/2.3.3/jasmine.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/2.3.3/jasmine.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/2.3.3/jasmine-html.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jasmine/2.3.3/boot.min.js"></script>
+    
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/masonry.pkgd.min.js"></script>
+	<script type="text/javascript" src="/js/imagesloaded.pkgd.min.js"></script>
+	<script type="text/javascript" src="/js/angular.min.js"></script>
+    <script type="text/javascript" src="https://code.angularjs.org/1.5.8/angular-mocks.js"></script>
+	<script type="text/javascript" src="/js/angular-masonry.js"></script>
+	<script type="text/javascript" src="/js/angular-resource.min.js"></script>
+	<script type="text/javascript" src="/js/angular-md5.min.js"></script>
+	<script type="text/javascript" src="/index.controller.js"></script>
+	<script type="text/javascript" src="/test.js"></script>
+</body>
+</html>
