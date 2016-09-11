@@ -8,12 +8,14 @@
 	<link rel="stylesheet" href="/css/myCss.css">
 
 </head>
-<body ng-controller='AppController' style="overflow: {{stopScrolling}};" >
+<body ng-controller='AppController'>
 	
-	<div class="bgimage"></div>
-	<login ng-show="login.show" ng-init="login.show='true'"></login>
-	<videos ng-show="!login.show" scroll></videos>
-	<popup ng-show="popup.show"></popup>
+	<div id="wrapper">
+		<div class="bgimage"></div>
+		<login ng-show="login.show" ng-init="login.show='true'"></login>
+		<videos ng-show="!login.show" scroll style="overflow: {{stopScrolling.flow}};position:{{stopScrolling.pos}}"></videos>
+		<popup ng-show="popup.show"></popup>
+	</div>
 	
 	<script type="text/javascript" src="/js/jquery.min.js"></script>
 	<script type="text/javascript" src="/js/masonry.pkgd.min.js"></script>

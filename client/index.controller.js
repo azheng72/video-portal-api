@@ -44,8 +44,8 @@ app.directive("scroll", function ($window,$document) {
         scope:false,
         link:function(scope, element, attrs) {
             angular.element($window).bind("scroll", function() {
-                
-                if(this.scrollY + $window.innerHeight == $document.height()) 
+
+                if(this.scrollY + $window.innerHeight == $document.height() && scope.stopScrolling.flow!=='hidden') 
                 {
                     
                     if(scope.page.currentPageNum * scope.page.numVideosEachPage >= scope.page.limit)
@@ -57,6 +57,19 @@ app.directive("scroll", function ($window,$document) {
                 }
     
             });
+        }
+    };
+});
+
+
+/**
+ * delete controls attribute from <video> element
+ */ 
+app.directive("removeControls", function ($timeout) {
+    return {
+        
+        link:function(scope, element, attrs) {
+                delete attrs.controls;
         }
     };
 });
@@ -90,6 +103,7 @@ app.controller('AppController',['$scope','myAjax','md5','$timeout',function($sco
     $scope.user={};
     $scope.videos={};
     $scope.popup={};
+    $scope.stopScrolling={};
     $scope.page={
         pageBtn:{},
         currentPageNum:1,
@@ -142,7 +156,8 @@ app.controller('AppController',['$scope','myAjax','md5','$timeout',function($sco
      */
     $scope.popupOpen=function(index) {
         
-        $scope.stopScrolling='hidden';//stop backgroud scrolling
+        $scope.stopScrolling.flow='hidden';//stop backgroud scrolling
+        $scope.stopScrolling.pos='fixed';
         $scope.popup={};
         $scope.popup.index=index;
         $scope.popup.show=true;
@@ -165,14 +180,15 @@ app.controller('AppController',['$scope','myAjax','md5','$timeout',function($sco
      */
     $scope.popupClose=function() {
         
-        $scope.stopScrolling=''; //enable scrolling
+        $scope.stopScrolling.flow=''; //enable scrolling
+        $scope.stopScrolling.pos='';
         $scope.popup.show=false;
         
         var v = document.getElementById("popupVideo");
         v.pause();//pause video
         
         // Save rating in server
-        if($scope.popup.myRate!==undefined)
+        if(typeof $scope.popup.myRate==="number" && $scope.popup.myRate>0)
         {
             myAjax.save(
                         {directive:'video', branch:'ratings', sessionId: $scope.user.sessionId}, 
@@ -187,6 +203,7 @@ app.controller('AppController',['$scope','myAjax','md5','$timeout',function($sco
                     var rateAvg = rateSum / parseFloat(v.ratings.length);
                     v.rateStar=new Array(Math.round(rateAvg)); //add rateStar[] attribue
                     $scope.videos[$scope.popup.index]=v; // update rating;
+                    
                 }
                 else
                 {
@@ -301,8 +318,6 @@ app.controller('AppController',['$scope','myAjax','md5','$timeout',function($sco
                 
                 $scope.videos=res.data;
                 console.log("Get videos success");
-                console.log(res.data);
-                
                 
             }
             else

@@ -1,5 +1,5 @@
 var configs = {};
-configs.applicationPort = 8080;
+configs.applicationPort = process.env.PORT || 8080;
 configs.dbName = 'CrossoverVideosAssignment';
 configs.dbHost = 'localhost';
 

@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 
 mongoose.Promise = global.Promise;
 //connedting to mongoDB
-mongoose.connect('mongodb://'+configs.dbHost+'/'+configs.dbName);
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://'+configs.dbHost+'/'+configs.dbName);
 //populating data if DB is not already populated.
 helperFunctions.populateDb();
 

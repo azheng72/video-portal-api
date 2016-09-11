@@ -152,7 +152,7 @@ describe('function popupOpen', function () {
         
         $scope.popupOpen(0);
         
-        expect($scope.stopScrolling).toBe('hidden');
+        expect($scope.stopScrolling.flow).toBe('hidden');
     
     }); 
     
@@ -174,6 +174,19 @@ describe('function popupOpen', function () {
     
     }); 
     
+    it('popup rateStyle should return as expect', function () {
+    
+        expect($scope.popup.rateStyle).toEqual([]);
+    
+    }); 
+  
+    it('popup stopScrolling.pos should return as expect', function () {
+    
+        expect($scope.stopScrolling.pos).toEqual('fixed');
+    
+    }); 
+        
+    
 });
 
 
@@ -194,7 +207,7 @@ describe('function popupClose', function () {
         myAjax = $injector.get('myAjax');
     }));  
 
-    it('selected video ratings should be updated', function () {
+    it('selected video ratings should be updated 1', function () {
         var $scope = {};
         var controller = $controller('AppController', { $scope: $scope });
 
@@ -235,10 +248,97 @@ describe('function popupClose', function () {
         expect($scope.videos[$scope.popup.index].ratings).toEqual([3,3,3,5]);
         expect($scope.videos[$scope.popup.index].rateStar.length).toBe(4);
         expect($scope.popup.show).toBe(false);
-        expect($scope.stopScrolling).toBe('');
+        expect($scope.stopScrolling.flow).toBe('');
     
     }); 
     
+    it('selected video ratings should be updated 2', function () {
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+
+        var x={};
+        x.pause=function(){};
+        spyOn(document, "getElementById").and.returnValue(x); 
+        
+        $scope.popup={
+            index:9,
+            show:true,
+            rateStyle:[{color:'gold'}],
+            myRate:1,
+            _id:"57d1a3c23d8a3b0fde58f9f2",
+            ratings:[3,3,3],
+            rateStar:['','','']
+        };
+        $scope.user.sessionId="abc";
+
+        $httpBackend.expect('POST', '/video/ratings?sessionId=abc',{
+            videoId: $scope.popup._id, 
+            rating: $scope.popup.myRate
+        }).respond({
+            status:'success',
+            data:{
+                _id:"57d1a3c23d8a3b0fde58f9f2",
+                ratings:[3,3,3,1]
+            }
+        });
+        
+        $scope.popupClose();
+        $httpBackend.flush();
+        
+        expect($scope.videos[$scope.popup.index].ratings).toEqual([3,3,3,1]);
+        expect($scope.videos[$scope.popup.index].rateStar.length).toBe(3);
+        expect($scope.popup.show).toBe(false);
+        expect($scope.stopScrolling.flow).toBe('');
+    
+    }); 
+    
+    it('selected video ratings should not be updated if popup.myRate==undefined', function () {
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+
+        var x={};
+        x.pause=function(){};
+        spyOn(document, "getElementById").and.returnValue(x); 
+        
+        $scope.videos[9]={ratings:[6,4,4]};
+        $scope.popup={
+            index:9,
+            show:true,
+            rateStyle:[],
+            myRate:undefined,
+            _id:"57d1a3c23d8a3b0fde58f9f2",
+            ratings:[3,3,3],
+            rateStar:['','','']
+        };
+        $scope.user.sessionId="abc";
+        
+        expect($scope.videos[$scope.popup.index].ratings).toEqual([6,4,4]);
+    
+    }); 
+    
+    it('selected video ratings should not be updated if popup.myRate<=0', function () {
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+
+        var x={};
+        x.pause=function(){};
+        spyOn(document, "getElementById").and.returnValue(x); 
+        
+        $scope.videos[9]={ratings:[4,4,4]};
+        $scope.popup={
+            index:9,
+            show:true,
+            rateStyle:[],
+            myRate:0,
+            _id:"57d1a3c23d8a3b0fde58f9f2",
+            ratings:[3,3,3],
+            rateStar:['','','']
+        };
+        $scope.user.sessionId="abc";
+        
+        expect($scope.videos[$scope.popup.index].ratings).toEqual([4,4,4]);
+    
+    }); 
 });
 
 
@@ -306,6 +406,63 @@ describe('function loginSubmit', function () {
     	expect($scope.login.show).toBe('');
     })); 
 
+    it('return should be error', inject(function ($timeout) {
+
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+        
+        $scope.videos=[];
+        $scope.login={
+            username:'al',
+            password:''
+        };
+        
+        $httpBackend.expect('POST', '/user/auth',{
+            username: $scope.login.username, 
+            password: "d41d8cd98f00b204e9800998ecf8427e"
+        }).respond({
+            status:'error'
+        });
+        
+        $scope.loginSubmit();
+        
+        $httpBackend.flush();
+        
+        expect($scope.user.username).toBe(undefined);
+        
+        expect($scope.user.sessionId).toBe(undefined);
+        
+    	expect($scope.login.error).toBe(true);
+    })); 
+    
+    it('return should be error if empty input', inject(function ($timeout) {
+
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+        
+        $scope.videos=[];
+        $scope.login={
+            username:'',
+            password:''
+        };
+        
+        $httpBackend.expect('POST', '/user/auth',{
+            username: $scope.login.username, 
+            password: "d41d8cd98f00b204e9800998ecf8427e"
+        }).respond({
+            status:'error'
+        });
+        
+        $scope.loginSubmit();
+        
+        $httpBackend.flush();
+        
+        expect($scope.user.username).toBe(undefined);
+        
+        expect($scope.user.sessionId).toBe(undefined);
+        
+    	expect($scope.login.error).toBe(true);
+    }));
 });
 
 describe('function logout', function () {
@@ -391,5 +548,37 @@ describe('function getVideos', function () {
         expect($scope.videos[0].rateStar.length).toBe(3);
     }); 
     
+    it('return videos should error', function () {
+        
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+        $scope.user.sessionId='abc';
+        
+        $httpBackend.expect('GET', '/videos?limit=10&sessionId=abc&skip=0')
+        .respond({
+            status:'error'
+        });
+        
+        $scope.getVideos(0,10);
+        $httpBackend.flush();
+        
+        expect($scope.videos).toEqual({});
+    });     
+    
+    it('return videos should error if not Auth request', function () {
+        
+        var $scope = {};
+        var controller = $controller('AppController', { $scope: $scope });
+        
+        $httpBackend.expect('GET', '/videos?limit=10&skip=0')
+        .respond({
+            status:'error'
+        });
+        
+        $scope.getVideos(0,10);
+        $httpBackend.flush();
+        
+        expect($scope.videos).toEqual({});
+    });  
 });
 
